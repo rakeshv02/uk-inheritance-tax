@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ROI Calculator — Return on Investment | Tabutility</title>
-  <meta name="description" content="Calculate return on investment (ROI), annualised return, and profit/loss for any investment. Simple and detailed ROI analysis." />
-  <meta name="keywords" content="roi calculator, return on investment, investment return, annualised return, profit calculator" />
-  <link rel="canonical" href="https://roi.tabutility.com/" />
-  <meta property="og:title" content="ROI Calculator — Return on Investment" />
-  <meta property="og:description" content="Calculate ROI, annualised return and profit for any investment instantly." />
+  <title>UK Inheritance Tax Calculator 2025/26 | Tabutility</title>
+  <meta name="description" content="Calculate UK inheritance tax (IHT) for 2025/26. Includes nil rate band, residence nil rate band, spouse exemption and charitable relief." />
+  <meta name="keywords" content="uk inheritance tax calculator, iht calculator, nil rate band, residence nil rate band, estate tax uk 2025" />
+  <link rel="canonical" href="https://uk-inheritance-tax.tabutility.com/" />
+  <meta property="og:title" content="UK Inheritance Tax Calculator 2025/26" />
+  <meta property="og:description" content="Calculate UK IHT including nil rate bands and spouse/charity exemptions." />
   <meta property="og:type" content="website" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>" />
   <meta name="robots" content="index, follow" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7039091592734005" crossorigin="anonymous"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-78VZWJ5B1W"></script>
@@ -24,25 +24,38 @@
 <script type="text/babel">
 //<![CDATA[
 const { useState } = React;
-function fmt(n){return '$'+Math.abs(Math.round(n)).toLocaleString();}
-function fmtPct(n){return (n>=0?'+':'')+n.toFixed(2)+'%';}
+function fmt(n){return '£'+Math.round(n).toLocaleString('en-GB');}
 
 function App() {
-  const [initial, setInitial] = useState(10000);
-  const [final, setFinal] = useState(14500);
-  const [years, setYears] = useState(3);
-  const [fees, setFees] = useState(0);
+  const [estate, setEstate] = useState(800000);
+  const [spouseDead, setSpouseDead] = useState(false);
+  const [hasHome, setHasHome] = useState(true);
+  const [homeValue, setHomeValue] = useState(400000);
+  const [charity, setCharity] = useState(0);
+  const [gifts, setGifts] = useState(0);
 
-  const inv = Number(initial)||0;
-  const fin = Number(final)||0;
-  const yrs = Number(years)||1;
-  const fee = Number(fees)||0;
+  const NRB = 325000;
+  const RNRB = 175000;
 
-  const netFinal = fin - fee;
-  const profit = netFinal - inv;
-  const roi = inv > 0 ? (profit / inv * 100) : 0;
-  const annualised = inv > 0 && yrs > 0 ? (Math.pow(netFinal/inv, 1/yrs)-1)*100 : 0;
-  const positive = profit >= 0;
+  // Total nil rate band available
+  let totalNRB = NRB;
+  if (spouseDead) totalNRB += NRB; // transferred NRB
+  let rnrb = 0;
+  if (hasHome) {
+    rnrb = Math.min(RNRB, Number(homeValue)||0);
+    if (spouseDead) rnrb = Math.min(rnrb * 2, RNRB * 2, Number(homeValue)||0);
+  }
+  const totalThreshold = totalNRB + rnrb;
+  const charityAmt = Number(charity)||0;
+  const giftsAmt = Number(gifts)||0;
+  const estateVal = Number(estate)||0;
+
+  const taxableEstate = Math.max(0, estateVal - charityAmt - totalThreshold + giftsAmt);
+  // Reduced rate if >= 10% to charity
+  const charityPct = estateVal > 0 ? charityAmt / estateVal : 0;
+  const ihtRate = charityPct >= 0.1 ? 0.36 : 0.40;
+  const ihtDue = taxableEstate * ihtRate;
+  const netEstate = estateVal - charityAmt - ihtDue;
 
   return (
     <div style={{maxWidth:520,margin:'0 auto',paddingBottom:40}}>
@@ -50,54 +63,84 @@ function App() {
         <a href="https://tabutility.com" style={{color:'#a5b4fc',textDecoration:'none',fontSize:14}}>← All Tools</a>
         <span style={{color:'#fff',fontWeight:700,fontSize:15}}>⚡ Tabutility</span>
       </div>
-      <div style={{background:'linear-gradient(135deg,#0891b2,#0e7490)',padding:'28px 20px',textAlign:'center',color:'#fff'}}>
-        <div style={{fontSize:36,marginBottom:8}}>📈</div>
-        <h1 style={{margin:'0 0 6px',fontSize:22,fontWeight:900}}>ROI Calculator</h1>
-        <p style={{margin:0,fontSize:13,opacity:0.85}}>Return on investment · annualised return · profit/loss</p>
+      <div style={{background:'linear-gradient(135deg,#374151,#1f2937)',padding:'28px 20px',textAlign:'center',color:'#fff'}}>
+        <div style={{fontSize:36,marginBottom:8}}>🏛️</div>
+        <h1 style={{margin:'0 0 6px',fontSize:22,fontWeight:900}}>UK Inheritance Tax Calculator</h1>
+        <p style={{margin:0,fontSize:13,opacity:0.85}}>IHT 2025/26 — nil rate band, RNRB &amp; exemptions</p>
       </div>
       <div style={{padding:20}}>
         <div style={{background:'#fff',borderRadius:14,padding:20,boxShadow:'0 2px 12px rgba(0,0,0,0.06)',marginBottom:16}}>
-          {[['Initial Investment','$',initial,setInitial],['Final Value','$',final,setFinal],['Fees / Costs','$',fees,setFees]].map(([label,prefix,val,setter])=>(
-            <div key={label} style={{marginBottom:14}}>
-              <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',marginBottom:6}}>{label}</label>
+          <div style={{marginBottom:14}}>
+            <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',marginBottom:6}}>Total Estate Value</label>
+            <div style={{position:'relative'}}>
+              <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6b7280'}}>£</span>
+              <input type="number" value={estate} onChange={e=>setEstate(e.target.value)}
+                style={{width:'100%',padding:'11px 12px 11px 28px',borderRadius:10,border:'2px solid #e5e7eb',fontSize:16,boxSizing:'border-box'}} />
+            </div>
+          </div>
+
+          {[
+            ['Gifts in last 7 years (PETs)','£',gifts,setGifts],
+            ['Charitable Donations','£',charity,setCharity],
+          ].map(([l,p,v,s])=>(
+            <div key={l} style={{marginBottom:14}}>
+              <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',marginBottom:6}}>{l}</label>
               <div style={{position:'relative'}}>
-                <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6b7280'}}>{prefix}</span>
-                <input type="number" value={val} onChange={e=>setter(e.target.value)}
+                <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6b7280'}}>{p}</span>
+                <input type="number" value={v} onChange={e=>s(e.target.value)}
                   style={{width:'100%',padding:'11px 12px 11px 28px',borderRadius:10,border:'2px solid #e5e7eb',fontSize:16,boxSizing:'border-box'}} />
               </div>
             </div>
           ))}
-          <div>
-            <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',marginBottom:6}}>Investment Period (years)</label>
-            <input type="number" value={years} onChange={e=>setYears(e.target.value)} min={0.1} step={0.5}
-              style={{width:'100%',padding:'11px 12px',borderRadius:10,border:'2px solid #e5e7eb',fontSize:16,boxSizing:'border-box'}} />
+
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {[[spouseDead,setSpouseDead,'Deceased spouse / civil partner (transfers their NRB)'],
+              [hasHome,setHasHome,'Leaving home to direct descendants (RNRB applies)']
+            ].map(([val,setter,label])=>(
+              <label key={label} style={{display:'flex',alignItems:'flex-start',gap:10,cursor:'pointer',fontSize:13,color:'#374151'}}>
+                <input type="checkbox" checked={val} onChange={e=>setter(e.target.checked)} style={{marginTop:2,accentColor:'#374151'}} />
+                {label}
+              </label>
+            ))}
           </div>
+
+          {hasHome && (
+            <div style={{marginTop:14}}>
+              <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',marginBottom:6}}>Property Value (for RNRB)</label>
+              <div style={{position:'relative'}}>
+                <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6b7280'}}>£</span>
+                <input type="number" value={homeValue} onChange={e=>setHomeValue(e.target.value)}
+                  style={{width:'100%',padding:'11px 12px 11px 28px',borderRadius:10,border:'2px solid #e5e7eb',fontSize:16,boxSizing:'border-box'}} />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div style={{background: positive?'#f0fdf4':'#fef2f2',borderRadius:14,padding:24,textAlign:'center',marginBottom:16,boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
-          <div style={{fontSize:13,fontWeight:600,color:'#6b7280',marginBottom:4}}>TOTAL ROI</div>
-          <div style={{fontSize:52,fontWeight:900,color: positive?'#059669':'#dc2626'}}>{fmtPct(roi)}</div>
-          <div style={{fontSize:15,color: positive?'#059669':'#dc2626',fontWeight:700}}>{positive?'+':''}{fmt(profit)} {positive?'profit':'loss'}</div>
+        <div style={{background: ihtDue > 0 ? 'linear-gradient(135deg,#fef2f2,#fee2e2)':'linear-gradient(135deg,#f0fdf4,#dcfce7)',borderRadius:14,padding:24,textAlign:'center',marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:700,color: ihtDue>0?'#991b1b':'#166534'}}>IHT DUE</div>
+          <div style={{fontSize:48,fontWeight:900,color: ihtDue>0?'#dc2626':'#16a34a',margin:'6px 0'}}>{fmt(ihtDue)}</div>
+          <div style={{fontSize:14,color:'#6b7280'}}>Net estate to beneficiaries: <strong>{fmt(netEstate)}</strong></div>
         </div>
 
         <div style={{background:'#fff',borderRadius:14,padding:20,boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
           {[
-            ['Initial Investment', fmt(inv)],
-            ['Final Value (before fees)', fmt(fin)],
-            ['Fees / Transaction Costs', fee > 0 ? '-'+fmt(fee) : '$0'],
-            ['Net Final Value', fmt(netFinal)],
-            ['Net Profit / Loss', (positive?'+':'-')+fmt(profit)],
-            ['Total ROI', fmtPct(roi)],
-            ['Annualised Return (CAGR)', fmtPct(annualised)+' / yr'],
+            ['Estate Value', fmt(estateVal)],
+            ['Nil Rate Band', fmt(NRB)+(spouseDead?' (×2 = '+fmt(NRB*2)+')':'')],
+            ['Residence NRB', fmt(rnrb)],
+            ['Total Tax-Free Threshold', fmt(totalThreshold)],
+            ['Charitable Gifts', fmt(charityAmt)],
+            ['7-Year Gifts Added Back', fmt(giftsAmt)],
+            ['Taxable Estate', fmt(taxableEstate)],
+            ['IHT Rate', (ihtRate*100)+'% '+(charityPct>=0.1?'(reduced for charity)':'')],
+            ['IHT Due', fmt(ihtDue)],
           ].map(([l,v])=>(
             <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid #f0f0f0',fontSize:14}}>
-              <span style={{color:'#6b7280'}}>{l}</span>
-              <strong style={{color: l.includes('Loss')||l.includes('Fees')&&fee>0?'#dc2626':l.includes('ROI')||l.includes('Profit')||l.includes('CAGR')?positive?'#059669':'#dc2626':'#1a1a2e'}}>{v}</strong>
+              <span style={{color:'#6b7280'}}>{l}</span><strong>{v}</strong>
             </div>
           ))}
         </div>
-        <div style={{background:'#ecfeff',borderRadius:12,padding:16,marginTop:16,fontSize:13,color:'#0e7490',lineHeight:1.6}}>
-          <strong>CAGR</strong> (Compound Annual Growth Rate) is the annualised ROI — useful when comparing investments held for different time periods.
+        <div style={{background:'#f9fafb',borderRadius:12,padding:16,marginTop:16,fontSize:13,color:'#374151',lineHeight:1.6}}>
+          <strong>2025/26:</strong> NRB £325,000. RNRB £175,000 (if leaving home to direct descendants). Both bands can double if transferring from deceased spouse. IHT rate 40% (36% if ≥10% to charity). Gifts made &gt;7 years ago are fully exempt.
         </div>
       </div>
     </div>
